@@ -11,11 +11,13 @@ from textual.widgets import Collapsible, Input, Markdown, Static
 from ..commands.slash import SlashCommand, suggest_commands
 
 
-DEEPCODE_MARK = [
-    r"        /\___/\\",
-    r"       (  o o  )",
-    r"       /   ^   \\",
-    r"      /|       |\\",
+# Block wordmark shown on the welcome splash, opencode-style.
+DEEPCODE_LOGO = [
+    "██████▖ ███████ ███████ ██████▖ ▗██████ ▗█████▖ ██████▖ ███████",
+    "██   ██▖██      ██      ██   ██▌██      ██   ██▌██   ██▖██     ",
+    "██   ██▌█████   █████   ██████▘ ██      ██   ██▌██   ██▌█████  ",
+    "██   ██▘██      ██      ██      ██      ██   ██▌██   ██▘██     ",
+    "██████▘ ███████ ███████ ██      ▝██████ ▝█████▘ ██████▘ ███████",
 ]
 
 
@@ -43,11 +45,10 @@ class WelcomeBanner(Static):
     DEFAULT_CSS = """
     WelcomeBanner {
         height: auto;
-        margin: 1 1 0 1;
-        padding: 1 2;
-        background: #15161c;
+        margin: 2 2 1 2;
+        padding: 1 3;
+        background: #0f1117;
         color: #f1f3f8;
-        border: round #5c7cfa;
     }
     WelcomeBanner.hidden {
         display: none;
@@ -62,29 +63,31 @@ class WelcomeBanner(Static):
 
     def render(self) -> Text:
         cwd_name = Path(self.cwd).name + "/" if self.cwd else "-"
-        muted = "#8b93a7"
-        accent = "#9ec5fe"
-        rows = [
-            Text.assemble(
-                Text("deepcode", style=f"bold {accent}"),
-                Text("  local coding agent", style=muted),
-            ),
-            Text(""),
-        ]
-        rows.extend(Text(line, style=accent) for line in DEEPCODE_MARK)
+        muted = "#6b7280"
+        accent = "#7aa2f7"
+        logo_top = "#9ec5fe"
+        logo_bottom = "#5c7cfa"
+        rows: list[Text] = [Text("")]
+        # Render the wordmark with a subtle top-to-bottom gradient.
+        logo_styles = [logo_top, logo_top, accent, logo_bottom, logo_bottom]
+        for line, style in zip(DEEPCODE_LOGO, logo_styles):
+            rows.append(Text(line, style=f"bold {style}"))
         rows.extend(
             [
                 Text(""),
+                Text("  local coding agent · 本地、有记忆的终端 agent", style=muted),
+                Text(""),
                 Text.assemble(
+                    Text("  ▌ ", style=accent),
                     Text("model ", style=muted),
-                    Text(self.model_name or "-", style=accent),
+                    Text(self.model_name or "-", style=f"bold {accent}"),
                     Text("   approval ", style=muted),
-                    Text(self.approval or "-", style=accent),
+                    Text(self.approval or "-", style=f"bold {accent}"),
                     Text("   cwd ", style=muted),
-                    Text(cwd_name, style=accent),
+                    Text(cwd_name, style=f"bold {accent}"),
                 ),
                 Text(
-                    "type /help for commands, Ctrl+L to clear, Ctrl+Q to quit",
+                    "  ▌ type /help for commands · Ctrl+L clear · Ctrl+Q quit",
                     style=muted,
                 ),
             ]
